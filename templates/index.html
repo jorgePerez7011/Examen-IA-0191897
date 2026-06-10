@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YOLO DETECTOR — PS4 EDITION</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #070b14;
+      --bg2:       #0d1220;
+      --border:    #1a2540;
+      --ps-blue:   #0070d1;
+      --ps-glow:   #00a8ff;
+      --ps-pink:   #ff2d78;
+      --ps-green:  #00c77a;
+      --ps-yellow: #f5c518;
+      --text:      #e8edf5;
+      --muted:     #4a5568;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 60px;
+      overflow-x: hidden;
+    }
+
+    /* ── Scanline overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 44px;
+      position: relative;
+    }
+
+    .ps-symbols {
+      font-size: 22px;
+      letter-spacing: 10px;
+      margin-bottom: 14px;
+      opacity: 0.9;
+    }
+
+    .ps-symbols .sq  { color: #ff2d78; }
+    .ps-symbols .x   { color: #6ab4ff; }
+    .ps-symbols .ci  { color: #f5c518; }
+    .ps-symbols .tr  { color: #00c77a; }
+
+    header h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(22px, 5vw, 42px);
+      font-weight: 900;
+      letter-spacing: 2px;
+      line-height: 1.15;
+      text-transform: uppercase;
+    }
+
+    header h1 .accent { color: var(--ps-glow); }
+
+    .subtitle {
+      margin-top: 10px;
+      font-size: 15px;
+      color: var(--muted);
+      font-weight: 300;
+      letter-spacing: 1px;
+    }
+
+    .version-badge {
+      display: inline-block;
+      margin-top: 14px;
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--ps-blue);
+      border: 1px solid var(--ps-blue);
+      padding: 4px 14px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      box-shadow: 0 0 10px rgba(0,112,209,0.3);
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 28px;
+      width: 100%;
+      max-width: 640px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Corner accents */
+    .card::before, .card::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-color: var(--ps-blue);
+      border-style: solid;
+    }
+    .card::before { top: 0; left: 0; border-width: 2px 0 0 2px; }
+    .card::after  { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+
+    /* ── Upload zone ── */
+    .upload-zone {
+      border: 1px dashed #1e3058;
+      border-radius: 4px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.25s, background 0.25s;
+      background: rgba(0,112,209,0.03);
+    }
+
+    .upload-zone:hover {
+      border-color: var(--ps-glow);
+      background: rgba(0,168,255,0.06);
+    }
+
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .upload-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .upload-zone p {
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 300;
+    }
+
+    .upload-zone p strong { color: var(--ps-glow); font-weight: 700; }
+
+    #file-name {
+      margin-top: 10px;
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      color: var(--ps-green);
+      letter-spacing: 1px;
+    }
+
+    /* ── Button ── */
+    .btn {
+      margin-top: 20px;
+      width: 100%;
+      padding: 15px;
+      background: var(--ps-blue);
+      color: #fff;
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 20px rgba(0,112,209,0.4);
+    }
+
+    .btn:hover {
+      background: var(--ps-glow);
+      box-shadow: 0 0 30px rgba(0,168,255,0.6);
+    }
+
+    .btn::after {
+      content: ' ▶';
+    }
+
+    /* ── Error ── */
+    .error {
+      margin-top: 14px;
+      color: var(--ps-pink);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* ── Results ── */
+    .result-img {
+      width: 100%;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .section-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: var(--ps-blue);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Detection items ── */
+    .detection-item {
+      background: rgba(0,112,209,0.05);
+      border: 1px solid #1a2e50;
+      border-left: 3px solid var(--ps-blue);
+      border-radius: 2px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      transition: border-color 0.2s;
+    }
+
+    .detection-item:hover { border-left-color: var(--ps-glow); }
+
+    .detection-item .label {
+      font-size: 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .detection-item .conf {
+      font-family: 'Orbitron', monospace;
+      font-size: 12px;
+      color: var(--ps-green);
+      background: rgba(0,199,122,0.08);
+      border: 1px solid rgba(0,199,122,0.25);
+      padding: 4px 12px;
+      border-radius: 2px;
+    }
+
+    .no-det {
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+      padding: 20px;
+      font-weight: 300;
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 20px;
+      font-family: 'Orbitron', monospace;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: #1e2d45;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="ps-symbols">
+      <span class="sq">■</span>
+      <span class="x">✕</span>
+      <span class="ci">○</span>
+      <span class="tr">△</span>
+    </div>
+    <h1>YOLO <span class="accent">DETECTOR</span></h1>
+    <p class="subtitle">Detección de objetos con YOLOv8 · Carrito &amp; ControlPlay4</p>
+    <span class="version-badge">YOLOv8 · EXAMEN IA · 2026</span>
+  </header>
+
+  <div class="card">
+    <form action="/predict" method="POST" enctype="multipart/form-data">
+      <div class="upload-zone">
+        <input type="file" name="image" id="img-input" accept="image/*" onchange="showName(this)" required />
+        <span class="upload-icon">🎮</span>
+        <p><strong>Presiona para cargar</strong> o arrastra tu imagen</p>
+        <p style="margin-top:4px; font-size:13px;">JPG · PNG · WEBP</p>
+        <div id="file-name"></div>
+      </div>
+
+      {% if error %}
+        <p class="error">⚠ {{ error }}</p>
+      {% endif %}
+
+      <button type="submit" class="btn">DETECTAR OBJETOS</button>
+    </form>
+  </div>
+
+  {% if result_image %}
+  <div class="card">
+    <p class="section-label">Resultado</p>
+    <img class="result-img" src="/static/results/{{ result_image }}" alt="Resultado de detección" />
+
+    {% if detections %}
+      <p class="section-label">{{ total }} objeto(s) detectado(s)</p>
+      {% for d in detections %}
+      <div class="detection-item">
+        <span class="label">{{ d.label.replace('_', ' ') }}</span>
+        <span class="conf">{{ d.confidence }}%</span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="no-det">// Sin detecciones //</p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <footer>Sistema de Visión por Computadora · YOLOv8</footer>
+
+  <script>
+    function showName(input) {
+      const el = document.getElementById('file-name');
+      el.textContent = input.files[0] ? '✓ ARCHIVO: ' + input.files[0].name : '';
+    }
+  </script>
+
+</body>
+</html>

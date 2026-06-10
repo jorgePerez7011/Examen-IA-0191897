@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 2
+names: ['Carrito', 'ControlPlay4']
+
+roboflow:
+  workspace: jorge-leonardo-perez-cardenas
+  project: examen-ia-h43iw
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/jorge-leonardo-perez-cardenas/examen-ia-h43iw/dataset/1
