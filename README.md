@@ -1,4 +1,4 @@
-# Examen Final – Detección de Objetos con YOLO (YOLOv8)
+# Examen Final – Detección de Objetos con YOLO (Jorge Perez-0191897)
 
 Aplicación de visión por computadora para **detección en tiempo real** y **detección por imágenes**, entrenada con un **dataset propio** etiquetado en formato YOLO.
 
@@ -20,7 +20,7 @@ El modelo está entrenado para **2 clases**:
 - **Carrito**
 - **ControlPlay4**
 
-Configuración de clases (ver `data.yaml`):
+Configuración de clases  `data.yaml`
 
 - `nc: 2`
 - `names: ['Carrito', 'ControlPlay4']`
@@ -81,42 +81,44 @@ Capturas incluidas en `Evidencias/`, por ejemplo:
 
 ## 5. Evaluación del Modelo
 
-Durante la evaluación se analizan métricas típicas de YOLO:
+En esta sección se describe cómo se evaluó el desempeño del modelo entrenado para **2 clases**: **Carrito** y **ControlPlay4**, usando el reporte de métricas generado por **Ultralytics (YOLOv8)**.
+ umbral de IoU (Intersección sobre Unión) son valores límite (entre 0 y 1) utilizados para definir si la predicción del modelo es correcta o no.
 
-### 5.1 Precision
-**Precision** mide qué proporción de las detecciones realizadas por el modelo son correctas:
+### 5.1 Precision (Carrito / ControlPlay4)
+**Precision** mide qué proporción de las detecciones realizadas por el modelo son correctas para cada clase:
 
-- Alta Precision ⇒ pocas falsas alarmas (detecciones incorrectas).
+- Alta Precision ⇒ pocas falsas alarmas (detecciones de **Carrito** o **ControlPlay4** que en realidad no corresponden).
 
-### 5.2 Recall
-**Recall** mide qué proporción de los objetos reales fueron detectados por el modelo:
+### 5.2 Recall (Carrito / ControlPlay4)
+**Recall** mide qué proporción de los objetos reales fueron detectados por el modelo para cada clase:
 
-- Alta Recall ⇒ pocos objetos reales se pierden.
+- Alta Recall ⇒ pocos objetos reales se pierden (p. ej., que instancias reales de **Carrito** no sean detectadas).
 
 ### 5.3 mAP@50
-**mAP@50** es el promedio del **Average Precision** sobre todas las clases usando:
-- umbral de IoU = 0.50
+**mAP@50** resume el desempeño de detección promediando el **Average Precision/Precisión promedio (AP)** de las clases con:
+- umbral de IoU = **0.50**
 
 ### 5.4 mAP@50-95
-**mAP@50-95** es el promedio del AP para múltiples umbrales de IoU:
-- IoU en el rango [0.50, 0.95] (paso típico 0.05)
+**mAP@50-95** es más estricto y promedia el AP para múltiples umbrales de IoU:
+- IoU en el rango **[0.50, 0.95]** (paso típico 0.05)
 
-Esto es más estricto que mAP@50 y evalúa mejor la calidad de localización.
+Esto evalúa mejor la **calidad de localización (bounding box)**: no solo que “detecte”, sino que las cajas se ajusten correctamente a **Carrito** y **ControlPlay4**.
 
-### 5.5 Evidencias de métricas
-Se incluyen figuras en `Evidencias/`:
+### 5.5 Evidencias de métricas (del entrenamiento realizado)
+Se incluyen evidencias visuales en `Evidencias/` para sustentar el análisis:
 
-- **Curvas de Precision/Recall/F1**:
+- **Curvas de Precision/Recall/F1** (evolución por épocas):
   - `Evidencias/BoxP_curve.png`
   - `Evidencias/BoxR_curve.png`
   - `Evidencias/BoxF1_curve.png`
   - `Evidencias/BoxPR_curve.png`
 
-- **Matriz de confusión**:
+- **Matriz de confusión** (cómo se confunden Carrito vs ControlPlay4):
   - `Evidencias/confusion_matrix_normalized.png`
   - `Evidencias/confusion_matrix.png`
 
-> Nota: Las cifras numéricas exactas (valores de Precision/Recall/mAP) dependen del reporte generado por Ultralytics para la corrida específica. Las evidencias visuales incluidas sustentan el análisis requerido.
+> Nota: Los valores numéricos exactos (Precision/Recall/mAP) se toman del reporte de Ultralytics correspondiente a la corrida. Las gráficas y la matriz incluidas en `Evidencias/` respaldan la interpretación para el modelo entrenado en este proyecto.
+
 
 ---
 
@@ -189,49 +191,18 @@ Durante la sustentación:
 
 ---
 
-## 9. Sustentación técnica (qué decir en la demostración en vivo)
-
-1. **Ejecución del sistema**
-   - Iniciar la app con `python app.py`.
-
-2. **Detección de las categorías entrenadas**
-   - Mostrar que la app detecta **Carrito** y **ControlPlay4**.
-
-3. **Explicar el dataset utilizado**
-   - Se etiquetó en formato YOLO.
-   - Se dividió en `train/`, `valid/`, `test/` usando `data.yaml`.
-
-4. **Explicar métricas obtenidas**
-   - Definir y diferenciar Precision, Recall, mAP@50 y mAP@50-95.
-   - Apoyar el análisis con capturas de curvas y matriz de confusión:
-     - `BoxP_curve`, `BoxR_curve`, `BoxF1_curve`, `BoxPR_curve`
-     - `confusion_matrix(_normalized)`
-
-5. **Explicación general de la arquitectura**
-   - Se usa YOLOv8 (backbone + neck + head para detección).
-   - El modelo aprende a predecir bounding boxes y clases.
-   - En inferencia, Flask carga `best.pt` y ejecuta `model(image, conf=..., iou=...)`.
-
-6. **Robustez del sistema**
-   - Mostrar resultados en varias imágenes del conjunto `test/` o imágenes similares.
-
----
-
-## 10. Modelo entrenado
+## 9. Modelo entrenado
 El modelo final se encuentra en:
 
 - `runs/detect/carrito_control_model-2/weights/best.pt`
 
 ---
 
-## 11. Archivos importantes (para el jurado)
-- `README.md` (este documento)
-- `data.yaml`
-- `train.py`
-- `app.py`
-- `camara.py` (opcional para tiempo real)
-- `requirements.txt`
-- Evidencias:
-  - `Evidencias/*`
+## Conclusiones
 
+En base a los resultados podemos decir que una buena toma a las fotos y los distintos angulos y luces de los mismos nos pueden dar mejores resultados, ademas tambien a la hora de empezar a entrenar el modelo las epocas deben ser las correctas ya que en medio de la realizacion del examen en una fase puse 50 epocas y el resultado fue el mismo, se llegaba a un sobrenetrenamiento, luego de ver los labels creados por el entrfenamiento de roboflow se logra evidenciar que el numero de instancias de el carrito es mayor que el del control, es decir para subir mas la precision del modelo se deben agregar mas fotos al dataset. 
+
+El desarrollo de este sistema de detección de objetos con YOLOv8 demostró que es posible construir un modelo funcional y preciso a partir de un dataset propio, siguiendo el flujo completo de recolección, etiquetado, entrenamiento y evaluación. Las métricas obtenidas (Precision, Recall, mAP@50 y mAP@50-95) evidencian que el modelo logra identificar correctamente las clases Carrito y ControlPlay4, con una buena capacidad de localización de los objetos en la imagen.
+
+La integración del modelo entrenado en una aplicación web con Flask valida la viabilidad de llevar soluciones de visión por computadora a entornos reales de uso, permitiendo realizar inferencias de forma sencilla a través de una interfaz accesible. Esto confirma que YOLOv8, incluso en su variante ligera (yolov8n), representa una opción eficiente y práctica para proyectos de detección en tiempo real con recursos computacionales limitados.
 
